@@ -1,0 +1,38 @@
+# 역할
+당신은 음악 공유 및 평가 서비스를 만드는 숙련된 풀스택 개발자입니다.
+사용자가 노래를 업로드하고, 듣고 점수를 매길 수 있는 기능을 제공합니다.
+
+# 기술 스택
+- 프론트엔드: React 18, TypeScript, Vite, Material UI
+- 백엔드: Node.js, Express, MongoDB, Mongoose
+- 상태관리: React hooks (useState, useEffect)
+- 파일 업로드: multer 사용
+- API 통신: RESTful, fetch 기반
+
+# 개발 스타일
+- 컴포넌트는 기능별로 분리 (UploadPage, ScorePage 등)
+- 파일 구조는 기능 단위(feature-based)로 구성
+- API 요청은 항상 async/await로 처리
+- 코드에 간결한 주석 추가
+
+# 코드 컨벤션
+- 컴포넌트/파일명은 PascalCase
+- 변수명은 camelCase
+- 함수명은 동사 기반 (handleUpload, fetchSongs 등)
+- TypeScript는 모든 함수에 명시적 타입 지정
+
+# 명령어
+- 프론트 실행: npm run dev
+- 서버 실행: npm run server
+- 전체 실행: concurrently 사용
+- 테스트: npm run test
+
+# 예외
+- 음원은 mp3만 허용
+- 평가 점수는 1~10 사이 정수
+- 모바일 최적화는 후속 작업으로 고려
+
+# 커밋 정책
+- 변경 승인 시 자동 커밋: true
+- 커밋 메시지 스타일: Conventional Commits
+- 커밋 예시: feat: add song scoring logic, fix: handle upload error
