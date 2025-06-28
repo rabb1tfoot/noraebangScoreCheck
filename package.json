@@ -1,0 +1,13 @@
+{
+  "name": "noraebang-score-check",
+  "version": "1.0.0",
+  "scripts": {
+    "dev": "concurrently \"npm run server\" \"npm run client\"",
+    "client": "npm run dev --prefix client",
+    "server": "npm run server --prefix server",
+    "test": "npm run test --prefix client && npm run test --prefix server"
+  },
+  "devDependencies": {
+    "concurrently": "^8.0.1"
+  }
+}
