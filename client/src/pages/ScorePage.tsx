@@ -12,6 +12,13 @@ const ScorePage: React.FC = () => {
   const [player, setPlayer] = useState<Howl | null>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
+  
+  // 분리된 트랙 상태 추가
+  const [separatedTracks, setSeparatedTracks] = useState<{
+    vocalUrl: string;
+    accompanimentUrl: string;
+  } | null>(null);
+  const [isSeparating, setIsSeparating] = useState(false);
 
   useEffect(() => {
     // 서버에서 노래 목록 가져오기
@@ -52,11 +59,50 @@ const ScorePage: React.FC = () => {
     }
   }, []);
 
+  // 선택된 노래 변경 시 음원 분리 처리
+  useEffect(() => {
+    const separateAudio = async () => {
+      if (!selectedSong) return;
+      
+      setIsSeparating(true);
+      try {
+        const response = await fetch('http://localhost:5002/api/separate-audio', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ audioUrl: selectedSong })
+        });
+        
+        if (response.ok) {
+          const data = await response.json();
+          setSeparatedTracks({
+            vocalUrl: data.vocalUrl,
+            accompanimentUrl: data.accompanimentUrl
+          });
+        } else {
+          console.error('음원 분리 실패:', await response.text());
+        }
+      } catch (error) {
+        console.error('음원 분리 요청 오류:', error);
+      } finally {
+        setIsSeparating(false);
+      }
+    };
+
+    if (selectedSong) {
+      separateAudio();
+    }
+  }, [selectedSong]);
+
   const handleStartRecording = () => {
     if (mediaRecorderRef.current) {
       audioChunksRef.current = [];
       mediaRecorderRef.current.start();
       setIsRecording(true);
+      
+      // 녹음 시작 시 반주 재생
+      if (!isPlaying && separatedTracks?.accompanimentUrl) {
+        handlePlayInstrumental();
+      }
     }
   };
 
@@ -64,6 +110,12 @@ const ScorePage: React.FC = () => {
     if (mediaRecorderRef.current && mediaRecorderRef.current.state === 'recording') {
       mediaRecorderRef.current.stop();
       setIsRecording(false);
+      
+      // 녹음 중지 시 반주 정지
+      if (isPlaying) {
+        player?.stop();
+        setIsPlaying(false);
+      }
     }
   };
 
@@ -74,12 +126,11 @@ const ScorePage: React.FC = () => {
       return;
     }
 
-    if (!selectedSong) return;
+    if (!separatedTracks?.accompanimentUrl) return;
 
-    const instrumentalUrl = `http://localhost:5002/instrumental/instrumental_${selectedSong}`;
     const newPlayer = new Howl({
-      src: [instrumentalUrl],
-      format: ['mp3'],
+      src: [separatedTracks.accompanimentUrl],
+      format: ['wav'],
       onend: () => setIsPlaying(false),
     });
 
@@ -117,10 +168,10 @@ const ScorePage: React.FC = () => {
 
       <div className="song-selection">
         <h3>연주할 노래 선택</h3>
-        <select 
-          value={selectedSong || ''} 
+        <select
+          value={selectedSong || ''}
           onChange={(e) => setSelectedSong(e.target.value)}
-          disabled={isRecording || isPlaying}
+          disabled={isRecording || isPlaying || isSeparating}
         >
           <option value="">-- 노래 선택 --</option>
           {songs.map(song => (
@@ -131,25 +182,28 @@ const ScorePage: React.FC = () => {
         </select>
         
         {selectedSong && (
-          <button 
-            onClick={handlePlayInstrumental}
-            disabled={isRecording || isPlaying}
-          >
-            {isPlaying ? '연주 중지' : '반주 재생'}
-          </button>
+          <div>
+            <button
+              onClick={handlePlayInstrumental}
+              disabled={isRecording || isPlaying || isSeparating || !separatedTracks}
+            >
+              {isPlaying ? '연주 중지' : '반주 재생'}
+            </button>
+            {isSeparating && <span>음원 분리 중...</span>}
+          </div>
         )}
       </div>
       
       <div className="recording-section">
         <div className="controls">
-          <button 
-            onClick={handleStartRecording} 
-            disabled={!selectedSong || isPlaying || isRecording}
+          <button
+            onClick={handleStartRecording}
+            disabled={!separatedTracks || isPlaying || isRecording || isSeparating}
           >
             녹음 시작
           </button>
-          <button 
-            onClick={handleStopRecording} 
+          <button
+            onClick={handleStopRecording}
             disabled={!isRecording}
           >
             녹음 중지
