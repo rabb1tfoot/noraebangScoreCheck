@@ -1,13 +1,15 @@
 import express from 'express';
 import cors from 'cors';
+import path from 'path';
 import uploadRoute from './routes/uploadRoute';
 
 const app = express();
-const port = 5001;
+const port = 5002;
 
 // 미들웨어 설정
 app.use(cors());
 app.use(express.json());
+app.use('/instrumental', express.static(path.join(__dirname, '../instrumental')));
 
 // 기본 라우트
 app.get('/', (req, res) => {
