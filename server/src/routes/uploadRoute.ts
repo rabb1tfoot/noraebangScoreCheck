@@ -1,28 +1,51 @@
 import express from 'express';
 import multer from 'multer';
-
-const router = express.Router();
 import fs from 'fs';
 import path from 'path';
 
+const router = express.Router();
 const upload = multer({ dest: 'uploads/' });
 
 // 레퍼런스 노래 업로드 및 분리
 router.post('/upload', upload.single('song'), (req, res) => {
   try {
-    // 파일 처리 로직 (추후 구현)
     const file = req.file;
     if (!file) {
       return res.status(400).json({ error: '파일이 제공되지 않았습니다.' });
     }
 
-    // 보컬/악기 분리 API 호출 (추후 구현)
-    // const separated = separateVocalAndInstrument(file.path);
+    // 업로드된 파일 정보
+    const originalName = file.originalname;
+    const tempPath = file.path;
+    const targetPath = path.join('uploads', originalName);
 
-    res.status(200).json({ 
-      message: '파일 업로드 성공', 
-      filename: file.originalname,
-      // separated
+    // 파일을 영구 저장 위치로 이동
+    fs.rename(tempPath, targetPath, (err) => {
+      if (err) {
+        console.error('파일 이동 오류:', err);
+        return res.status(500).json({ error: '파일 저장 실패' });
+      }
+
+      // 보컬 분리 처리 (가상의 함수 호출)
+      // 실제 구현 시 음성 분리 라이브러리 사용
+      const vocalPath = path.join('vocal', `vocal_${originalName}`);
+      const instrumentalPath = path.join('instrumental', `instrumental_${originalName}`);
+
+      // 임시로 파일 복사로 대체 (실제로는 음성 분리 알고리즘 적용)
+      fs.copyFile(targetPath, vocalPath, (err) => {
+        if (err) console.error('보컬 파일 생성 오류:', err);
+      });
+      
+      fs.copyFile(targetPath, instrumentalPath, (err) => {
+        if (err) console.error('반주 파일 생성 오류:', err);
+      });
+
+      res.status(200).json({ 
+        message: '파일 업로드 및 처리 성공', 
+        filename: originalName,
+        vocalPath,
+        instrumentalPath
+      });
     });
   } catch (error) {
     console.error('업로드 오류:', error);
@@ -51,6 +74,27 @@ router.get('/songs', (req, res) => {
     });
   } catch (error) {
     console.error('노래 목록 조회 오류:', error);
+    res.status(500).json({ error: '서버 내부 오류' });
+  }
+});
+
+// 녹음된 음원 점수 계산
+router.post('/score', upload.single('audio'), (req, res) => {
+  try {
+    const file = req.file;
+    if (!file) {
+      return res.status(400).json({ error: '오디오 파일이 제공되지 않았습니다.' });
+    }
+
+    // 파일 처리 로직 (임시로 랜덤 점수 반환)
+    const score = Math.floor(Math.random() * 10) + 1;
+    
+    // 실제 구현 시:
+    // const score = calculateScore(file.path);
+    
+    res.status(200).json({ score });
+  } catch (error) {
+    console.error('점수 계산 오류:', error);
     res.status(500).json({ error: '서버 내부 오류' });
   }
 });

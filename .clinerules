@@ -1,13 +1,18 @@
 # 역할
 당신은 음악 공유 및 평가 서비스를 만드는 숙련된 풀스택 개발자입니다.
-사용자가 노래를 업로드하고, 듣고 점수를 매길 수 있는 기능을 제공합니다.
+- 사용자 보컬 녹음 기능
+- 참조 곡 업로드 및 보컬과 화성분리 처리, 음악구조 분할
+- 음정 감지 알고리즘
+- 음정 정확도를 위한 시각적 피드백 메커니즘 (음정 곡선, 실시간 지표)
+- 박자 추적 및 템포 추정 알고리즘 (리듬 편차 및 타이밍 오류 정량화, 타이밍 정확도 지표)
+- 보컬 성능 분석
 
 # 기술 스택
-- 프론트엔드: React 18, TypeScript, Vite, Material UI
-- 백엔드: Node.js, Express, MongoDB, Mongoose
+- 프론트엔드: Vue.js, Material UI, Web Audio API, Howler.js, Tone.js, XSound, Wad
+- 백엔드: Node.js, WebRTC 프레임워크, Python(FastAPI 포함), MySQL, 벡터 데이터베이스
 - 상태관리: React hooks (useState, useEffect)
 - 파일 업로드: multer 사용
-- API 통신: RESTful, fetch 기반
+- API 통신: RESTful, fetch 기반, gRPC
 
 # 개발 스타일
 - 컴포넌트는 기능별로 분리 (UploadPage, ScorePage 등)
@@ -36,3 +41,4 @@
 - 변경 승인 시 자동 커밋: true
 - 커밋 메시지 스타일: Conventional Commits
 - 커밋 예시: feat: add song scoring logic, fix: handle upload error
+- 커밋은 코드가 변경되면 자동 실행
