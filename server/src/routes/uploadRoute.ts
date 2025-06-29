@@ -2,6 +2,9 @@ import express from 'express';
 import multer from 'multer';
 
 const router = express.Router();
+import fs from 'fs';
+import path from 'path';
+
 const upload = multer({ dest: 'uploads/' });
 
 // 레퍼런스 노래 업로드 및 분리
@@ -23,6 +26,31 @@ router.post('/upload', upload.single('song'), (req, res) => {
     });
   } catch (error) {
     console.error('업로드 오류:', error);
+    res.status(500).json({ error: '서버 내부 오류' });
+  }
+});
+
+// 업로드된 노래 목록 조회
+router.get('/songs', (req, res) => {
+  try {
+    const uploadDir = 'uploads';
+    fs.readdir(uploadDir, (err, files) => {
+      if (err) {
+        console.error('파일 목록 읽기 오류:', err);
+        return res.status(500).json({ error: '서버 내부 오류' });
+      }
+      
+      const songs = files
+        .filter(file => file.endsWith('.mp3'))
+        .map(file => ({
+          filename: file,
+          path: path.join(uploadDir, file)
+        }));
+      
+      res.status(200).json(songs);
+    });
+  } catch (error) {
+    console.error('노래 목록 조회 오류:', error);
     res.status(500).json({ error: '서버 내부 오류' });
   }
 });

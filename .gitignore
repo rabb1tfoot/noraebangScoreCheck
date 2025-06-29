@@ -1,0 +1,30 @@
+# 의존성 디렉토리
+node_modules/
+client/node_modules/
+server/node_modules/
+
+# 빌드 산출물
+dist/
+build/
+.vite/
+
+# 환경 설정
+.env
+.env.local
+
+# 로그 파일
+*.log
+npm-debug.log*
+
+# 운영체제 파일
+.DS_Store
+Thumbs.db
+
+# IDE 설정
+.idea/
+.vscode/
+
+# 패키지 잠금 파일 (추가로 관리할 경우)
+# package-lock.json
+# server/package-lock.json
+# client/package-lock.json

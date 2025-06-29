@@ -1,8 +1,24 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 const ScorePage: React.FC = () => {
   const [isRecording, setIsRecording] = useState(false);
   const [score, setScore] = useState<number | null>(null);
+  const [songs, setSongs] = useState<Array<{filename: string, path: string}>>([]);
+
+  useEffect(() => {
+    // 서버에서 노래 목록 가져오기
+    const fetchSongs = async () => {
+      try {
+        const response = await fetch('http://localhost:5001/api/songs');
+        const data = await response.json();
+        setSongs(data);
+      } catch (error) {
+        console.error('노래 목록 가져오기 실패:', error);
+      }
+    };
+
+    fetchSongs();
+  }, []);
 
   const handleStartRecording = () => {
     // 녹음 시작 로직 (추후 구현)
@@ -19,6 +35,18 @@ const ScorePage: React.FC = () => {
   return (
     <div className="score-page">
       <h2>노래 녹음 및 점수 확인</h2>
+
+      <div className="song-list">
+        <h3>업로드된 노래</h3>
+        <ul>
+          {songs.map(song => (
+            <li key={song.filename}>
+              {song.filename}
+              <button onClick={() => console.log('선택:', song.filename)}>선택</button>
+            </li>
+          ))}
+        </ul>
+      </div>
       
       <div className="recording-controls">
         {!isRecording ? (

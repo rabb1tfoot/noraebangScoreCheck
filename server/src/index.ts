@@ -3,7 +3,7 @@ import cors from 'cors';
 import uploadRoute from './routes/uploadRoute';
 
 const app = express();
-const port = 5000;
+const port = 5001;
 
 // 미들웨어 설정
 app.use(cors());
