@@ -22,18 +22,19 @@ def separate_audio(input_path: str, output_dir: str) -> dict:
     audio_loader = AudioAdapter.default()
     
     # 오디오 로드
+    # 오디오 로드 (MP3 직접 지원)
     sample_rate = 44100
     waveform, _ = audio_loader.load(input_path, sample_rate=sample_rate)
     
     # 오디오 분리
     prediction = separator.separate(waveform)
     
-    # 분리된 트랙 저장
-    vocal_path = Path(output_dir) / "vocals.wav"
-    accompaniment_path = Path(output_dir) / "accompaniment.wav"
+    # 분리된 트랙 저장 (MP3 형식으로 저장)
+    vocal_path = Path(output_dir) / "vocals.mp3"
+    accompaniment_path = Path(output_dir) / "accompaniment.mp3"
     
-    audio_loader.save(str(vocal_path), prediction['vocals'], sample_rate)
-    audio_loader.save(str(accompaniment_path), prediction['accompaniment'], sample_rate)
+    audio_loader.save(str(vocal_path), prediction['vocals'], sample_rate, codec='mp3')
+    audio_loader.save(str(accompaniment_path), prediction['accompaniment'], sample_rate, codec='mp3')
     
     return {
         "vocal_path": str(vocal_path),

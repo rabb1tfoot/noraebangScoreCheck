@@ -6,7 +6,7 @@ import uploadRoute from './routes/uploadRoute';
 import separationRoute from './routes/separationRoute';
 
 const app = express();
-const port = 5002;
+const port = 5003;
 
 // 디렉토리 생성 (업로드 및 분리된 트랙 저장)
 const UPLOAD_DIR = path.join(__dirname, '../uploads');

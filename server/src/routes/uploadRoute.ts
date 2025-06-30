@@ -3,8 +3,18 @@ import multer from 'multer';
 import fs from 'fs';
 import path from 'path';
 
+import { v4 as uuidv4 } from 'uuid';
+
 const router = express.Router();
-const upload = multer({ dest: 'uploads/' });
+const storage = multer.diskStorage({
+  destination: 'uploads/',
+  filename: (req, file, cb) => {
+    // UUID를 사용하여 파일명 생성 (한글 깨짐 문제 해결)
+    const uniqueName = `${uuidv4()}${path.extname(file.originalname)}`;
+    cb(null, uniqueName);
+  }
+});
+const upload = multer({ storage });
 
 // 레퍼런스 노래 업로드 및 분리
 router.post('/upload', upload.single('song'), (req, res) => {
@@ -14,37 +24,49 @@ router.post('/upload', upload.single('song'), (req, res) => {
       return res.status(400).json({ error: '파일이 제공되지 않았습니다.' });
     }
 
-    // 업로드된 파일 정보
+    // 업로드된 파일 정보 (UUID 파일명 사용)
     const originalName = file.originalname;
     const tempPath = file.path;
-    const targetPath = path.join('uploads', originalName);
+    const targetPath = path.join('uploads', file.filename);
 
-    // 파일을 영구 저장 위치로 이동
-    fs.rename(tempPath, targetPath, (err) => {
-      if (err) {
-        console.error('파일 이동 오류:', err);
-        return res.status(500).json({ error: '파일 저장 실패' });
+    // 파일은 이미 multer에 의해 targetPath에 저장됨
+    const vocalPath = path.join('vocal', `vocal_${file.filename}`);
+    const instrumentalPath = path.join('instrumental', `instrumental_${file.filename}`);
+
+    // 디렉토리 생성 및 파일 복사 (비동기)
+    fs.mkdir(path.dirname(vocalPath), { recursive: true }, (dirErr) => {
+      if (dirErr) {
+        console.error('보컬 디렉토리 생성 오류:', dirErr);
+        return res.status(500).json({ error: '보컬 디렉토리 생성 실패' });
       }
 
-      // 보컬 분리 처리 (가상의 함수 호출)
-      // 실제 구현 시 음성 분리 라이브러리 사용
-      const vocalPath = path.join('vocal', `vocal_${originalName}`);
-      const instrumentalPath = path.join('instrumental', `instrumental_${originalName}`);
+      fs.mkdir(path.dirname(instrumentalPath), { recursive: true }, (dirErr2) => {
+        if (dirErr2) {
+          console.error('반주 디렉토리 생성 오류:', dirErr2);
+          return res.status(500).json({ error: '반주 디렉토리 생성 실패' });
+        }
 
-      // 임시로 파일 복사로 대체 (실제로는 음성 분리 알고리즘 적용)
-      fs.copyFile(targetPath, vocalPath, (err) => {
-        if (err) console.error('보컬 파일 생성 오류:', err);
-      });
-      
-      fs.copyFile(targetPath, instrumentalPath, (err) => {
-        if (err) console.error('반주 파일 생성 오류:', err);
-      });
+        // 파일 복사
+        fs.copyFile(file.path, vocalPath, (copyErr) => {
+          if (copyErr) {
+            console.error('보컬 파일 복사 오류:', copyErr);
+            return res.status(500).json({ error: '보컬 파일 복사 실패' });
+          }
 
-      res.status(200).json({ 
-        message: '파일 업로드 및 처리 성공', 
-        filename: originalName,
-        vocalPath,
-        instrumentalPath
+          fs.copyFile(file.path, instrumentalPath, (copyErr2) => {
+            if (copyErr2) {
+              console.error('반주 파일 복사 오류:', copyErr2);
+              return res.status(500).json({ error: '반주 파일 복사 실패' });
+            }
+
+            res.status(200).json({
+              message: '파일 업로드 및 처리 성공',
+              filename: originalName,
+              vocalPath,
+              instrumentalPath
+            });
+          });
+        });
       });
     });
   } catch (error) {
