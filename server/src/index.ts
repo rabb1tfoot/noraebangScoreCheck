@@ -1,4 +1,4 @@
-import express from 'express';
+import express, { Request, Response, NextFunction } from 'express';
 import cors from 'cors';
 import path from 'path';
 import fs from 'fs';
@@ -30,6 +30,19 @@ app.use('/api', uploadRoute);
 
 // 음원 분리 라우트 추가
 app.use('/api', separationRoute);
+
+// 오류 처리 미들웨어
+app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
+  console.error(`[${new Date().toISOString()}] ${err.stack}`);
+  
+  const statusCode = res.statusCode !== 200 ? res.statusCode : 500;
+  res.status(statusCode).json({
+    error: {
+      message: err.message || 'Internal Server Error',
+      ...(process.env.NODE_ENV === 'development' && { stack: err.stack })
+    }
+  });
+});
 
 // 서버 시작
 app.listen(port, () => {

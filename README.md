@@ -5,8 +5,8 @@
 ## 기술 스택
 - **프론트엔드**: React 18, TypeScript, Vite, Material UI
 - **백엔드**: Node.js, Express
-- **음원 분리 서비스**: Python, FastAPI, Spleeter
-- **기타**: multer (파일 업로드), cors, axios
+- **음원 분석 서비스**: Python, FastAPI, Spleeter, Librosa, Whisper
+- **기타**: multer (파일 업로드), cors, axios, fastdtw
 
 ## 설치 및 실행 방법
 
@@ -62,7 +62,9 @@ npm run dev
 │   ├── python-service/  # 음원 분리 서비스
 │   │   ├── src/
 │   │   │   ├── main.py
-│   │   │   └── separator.py
+│   │   │   ├── separator.py
+│   │   │   ├── pitch_analyzer.py  # 음정 분석 모듈
+│   │   │   └── rhythm_analyzer.py # 리듬 분석 모듈
 │   ├── src/
 │   │   ├── routes/      # API 라우트
 │   │   └── index.ts     # 서버 진입점
@@ -75,28 +77,27 @@ npm run dev
 
 ## 주요 기능
 1. **노래 업로드**: MP3 파일 업로드 및 서버 저장 (한글 파일명 지원)
-2. **고급 음원 처리**: Librosa 기반 마디 분할 및 Whisper 가사 추출
-3. **노래 녹음**: 사용자 보컬 녹음 기능 (구현 중)
-4. **점수 평가**: 원본과 녹음 비교 점수화 (구현 중)
+2. **음원 분리**: Spleeter 기반 보컬/반주 분리
+3. **음정 분석**: Librosa 기반 음정 추출 및 정확도 계산 (DTW 알고리즘)
+4. **리듬 분석**: 비트 감지 및 템포 분석을 통한 리듬 정확도 평가
+5. **종합 점수**: 음정(50%) + 리듬(50%) 가중치 기반 최종 점수 산출
+6. **노래 녹음**: Web Audio API 기반 사용자 보컬 녹음 기능
+7. **시각화**: 음정 곡선 및 비트 정렬 시각화 리포트 생성
 
 ## 해결된 주요 문제
 - 프론트엔드 서버 실행 오류 해결
 - 한글 파일명 깨짐 문제 해결 (UUID 파일명 사용)
 - 음원 분리 서비스 종속성 호환성 문제 해결
 - 파일 처리 로직 개선 (비동기 방식)
-
-## Docker 실행 방법
-
-```bash
-# Python 서비스 빌드
-cd server/python-service
-docker build -t noraebang-python-service .
-
-# Python 서비스 실행 (포트 8000)
-docker run -d -p 8000:8000 noraebang-python-service
-```
+- 음원 분리 및 분석 파이프라인 최적화
+- Windows 환경에서의 Python 실행 경로 문제 해결
 
 ## 업데이트 내역 (2025-08-01)
 - 음원 처리 파이프라인 개선: Librosa 및 Whisper 통합
 - Python 종속성 충돌 해결: spleeter와 librosa 호환성 문제 해결
 - Python 3.8.10 환경에서 안정적인 설치 보장
+- 음정 분석 알고리즘 구현 완료 (pitch_analyzer.py)
+- 리듬 분석 알고리즘 구현 완료 (rhythm_analyzer.py)
+- 종합 점수 계산 로직 구현 (음정 50% + 리듬 50%)
+- 오류 처리 미들웨어 및 예외 케이스 핸들링 구현
+- 서버 측 분석 결과 처리 로직 개선

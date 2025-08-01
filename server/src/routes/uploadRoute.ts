@@ -101,20 +101,34 @@ router.get('/songs', (req, res) => {
 });
 
 // 녹음된 음원 점수 계산
-router.post('/score', upload.single('audio'), (req, res) => {
+router.post('/score', upload.single('audio'), async (req, res) => {
   try {
     const file = req.file;
-    if (!file) {
-      return res.status(400).json({ error: '오디오 파일이 제공되지 않았습니다.' });
+    const { referenceSong } = req.body;
+    
+    if (!file || !referenceSong) {
+      return res.status(400).json({ error: '오디오 파일과 레퍼런스 노래가 필요합니다.' });
     }
 
-    // 파일 처리 로직 (임시로 랜덤 점수 반환)
-    const score = Math.floor(Math.random() * 10) + 1;
+    // 레퍼런스 노래 경로 생성
+    const referencePath = path.resolve(__dirname, '../../uploads', referenceSong);
     
-    // 실제 구현 시:
-    // const score = calculateScore(file.path);
+    // 음원 분리 및 점수 계산 실행
+    const result = await separateAudio(referencePath, file.path);
+    // separateAudio 함수는 referencePath를 음원 분리할 파일로, file.path를 사용자 녹음 파일로 사용
     
-    res.status(200).json({ score });
+    if (result.total_score === undefined) {
+      throw new Error('점수 계산에 실패했습니다.');
+    }
+    
+    res.status(200).json({
+      score: result.total_score,
+      pitchScore: result.pitch_score,
+      rhythmScore: result.rhythm_score,
+      tempoDifference: result.tempo_difference,
+      pitchPlot: result.pitch_plot,
+      rhythmPlot: result.rhythm_plot
+    });
   } catch (error) {
     console.error('점수 계산 오류:', error);
     res.status(500).json({ error: '서버 내부 오류' });
