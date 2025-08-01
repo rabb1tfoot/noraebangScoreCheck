@@ -75,7 +75,7 @@ npm run dev
 
 ## 주요 기능
 1. **노래 업로드**: MP3 파일 업로드 및 서버 저장 (한글 파일명 지원)
-2. **보컬/악기 분리**: Spleeter 기반 음원 분리 처리
+2. **고급 음원 처리**: Librosa 기반 마디 분할 및 Whisper 가사 추출
 3. **노래 녹음**: 사용자 보컬 녹음 기능 (구현 중)
 4. **점수 평가**: 원본과 녹음 비교 점수화 (구현 중)
 
@@ -84,3 +84,14 @@ npm run dev
 - 한글 파일명 깨짐 문제 해결 (UUID 파일명 사용)
 - 음원 분리 서비스 종속성 호환성 문제 해결
 - 파일 처리 로직 개선 (비동기 방식)
+
+## Docker 실행 방법
+
+```bash
+# Python 서비스 빌드
+cd server/python-service
+docker build -t noraebang-python-service .
+
+# Python 서비스 실행 (포트 8000)
+docker run -d -p 8000:8000 noraebang-python-service
+```
