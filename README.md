@@ -13,7 +13,7 @@
 ### 전제 조건
 - Node.js (v18 이상)
 - npm (v9 이상)
-- Python 3.9 이상
+- Python 3.8.10
 - pip
 
 ### 설치
@@ -95,3 +95,8 @@ docker build -t noraebang-python-service .
 # Python 서비스 실행 (포트 8000)
 docker run -d -p 8000:8000 noraebang-python-service
 ```
+
+## 업데이트 내역 (2025-08-01)
+- 음원 처리 파이프라인 개선: Librosa 및 Whisper 통합
+- Python 종속성 충돌 해결: spleeter와 librosa 호환성 문제 해결
+- Python 3.8.10 환경에서 안정적인 설치 보장
